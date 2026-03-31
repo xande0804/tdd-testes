@@ -1,8 +1,24 @@
+// ============================================================
+// taskManager.js — Regras de negócio do gerenciador de tarefas
+// ============================================================
+// Todas as funções são PURAS:
+//   - mesma entrada → mesma saída
+//   - sem efeitos colaterais
+//   - sem dependência de DOM, banco de dados ou APIs externas
+// ============================================================
+
 let _nextId = 1;
 
+/**
+ * Reseta o contador de IDs (útil para testes determinísticos).
+ */
 export function resetId() {
   _nextId = 1;
 }
+
+// ------------------------------------------------------------
+// Validação
+// ------------------------------------------------------------
 
 export function validateTitle(title) {
   if (typeof title !== 'string') {
@@ -12,6 +28,10 @@ export function validateTitle(title) {
   const trimmed = title.trim();
   return trimmed.length >= 3;
 }
+
+// ------------------------------------------------------------
+// Criação
+// ------------------------------------------------------------
 
 export function createTask(title) {
   return {
@@ -32,6 +52,10 @@ export function addTask(tasks, title) {
   return [...tasks, newTask];
 }
 
+// ------------------------------------------------------------
+// Alteração de estado
+// ------------------------------------------------------------
+
 export function toggleTask(task) {
   return {
     ...task,
@@ -39,9 +63,17 @@ export function toggleTask(task) {
   };
 }
 
+// ------------------------------------------------------------
+// Remoção
+// ------------------------------------------------------------
+
 export function removeTask(tasks, taskId) {
   return tasks.filter((task) => task.id !== taskId);
 }
+
+// ------------------------------------------------------------
+// Filtros
+// ------------------------------------------------------------
 
 export function filterTasks(tasks, status) {
   switch (status) {
@@ -53,4 +85,20 @@ export function filterTasks(tasks, status) {
     default:
       return [...tasks];
   }
+}
+
+// ------------------------------------------------------------
+// Contagens
+// ------------------------------------------------------------
+
+export function countTasks(tasks) {
+  return tasks.length;
+}
+
+export function countCompleted(tasks) {
+  return tasks.filter((task) => task.completed === true).length;
+}
+
+export function countPending(tasks) {
+  return tasks.filter((task) => task.completed === false).length;
 }
