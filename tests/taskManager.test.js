@@ -5,6 +5,7 @@ import {
   addTask,
   toggleTask,
   removeTask,
+  filterTasks,
   resetId,
 } from '../src/taskManager.js';
 
@@ -214,5 +215,56 @@ describe('removeTask', () => {
     const updated = removeTask([], 1);
 
     expect(updated).toHaveLength(0);
+  });
+});
+
+describe('filterTasks', () => {
+  let tasks;
+
+  beforeEach(() => {
+    resetId();
+    tasks = addTask([], 'Tarefa 1');
+    tasks = addTask(tasks, 'Tarefa 2');
+    tasks = addTask(tasks, 'Tarefa 3');
+
+    // Marca a tarefa 2 como concluída
+    tasks = tasks.map((t) => (t.id === 2 ? toggleTask(t) : t));
+  });
+
+  it('deve retornar todas as tarefas com filtro "all"', () => {
+    const result = filterTasks(tasks, 'all');
+
+    expect(result).toHaveLength(3);
+  });
+
+  it('deve retornar apenas pendentes com filtro "pending"', () => {
+    const result = filterTasks(tasks, 'pending');
+
+    expect(result).toHaveLength(2);
+    result.forEach((t) => expect(t.completed).toBe(false));
+  });
+
+  it('deve retornar apenas concluídas com filtro "completed"', () => {
+    const result = filterTasks(tasks, 'completed');
+
+    expect(result).toHaveLength(1);
+    expect(result[0].title).toBe('Tarefa 2');
+    expect(result[0].completed).toBe(true);
+  });
+
+  it('deve retornar todas as tarefas para filtro desconhecido', () => {
+    const result = filterTasks(tasks, 'qualquer');
+
+    expect(result).toHaveLength(3);
+  });
+
+  it('deve retornar array vazio para lista vazia', () => {
+    expect(filterTasks([], 'all')).toHaveLength(0);
+  });
+
+  it('deve retornar um NOVO array (imutabilidade)', () => {
+    const result = filterTasks(tasks, 'all');
+
+    expect(result).not.toBe(tasks);
   });
 });
