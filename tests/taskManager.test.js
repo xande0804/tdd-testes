@@ -12,6 +12,9 @@ import {
   resetId,
 } from '../src/taskManager.js';
 
+// ============================================================
+// 1. validateTitle
+// ============================================================
 describe('validateTitle', () => {
   it('deve retornar true para um título válido', () => {
     expect(validateTitle('Estudar Vitest')).toBe(true);
@@ -58,6 +61,9 @@ describe('validateTitle', () => {
   });
 });
 
+// ============================================================
+// 2. createTask
+// ============================================================
 describe('createTask', () => {
   beforeEach(() => {
     resetId();
@@ -91,6 +97,9 @@ describe('createTask', () => {
   });
 });
 
+// ============================================================
+// 3. addTask
+// ============================================================
 describe('addTask', () => {
   beforeEach(() => {
     resetId();
@@ -140,6 +149,9 @@ describe('addTask', () => {
   });
 });
 
+// ============================================================
+// 4. toggleTask
+// ============================================================
 describe('toggleTask', () => {
   beforeEach(() => {
     resetId();
@@ -153,14 +165,14 @@ describe('toggleTask', () => {
   });
 
   it('deve desmarcar uma tarefa concluída', () => {
-    const task = createTask('Tarefa');
+    const task = createTask('Tarefa pendente');
     const completed = toggleTask(task);
     const uncompleted = toggleTask(completed);
 
     expect(uncompleted.completed).toBe(false);
   });
 
-  it('deve manter id e title inalterados', () => {
+  it('deve manter o id e o título inalterados', () => {
     const task = createTask('Minha tarefa');
     const toggled = toggleTask(task);
 
@@ -169,14 +181,17 @@ describe('toggleTask', () => {
   });
 
   it('deve retornar um NOVO objeto (imutabilidade)', () => {
-    const task = createTask('Original');
+    const task = createTask('Tarefa original');
     const toggled = toggleTask(task);
 
     expect(toggled).not.toBe(task);
-    expect(task.completed).toBe(false);
+    expect(task.completed).toBe(false); // original inalterado
   });
 });
 
+// ============================================================
+// 5. removeTask
+// ============================================================
 describe('removeTask', () => {
   let tasks;
 
@@ -205,7 +220,7 @@ describe('removeTask', () => {
     const updated = removeTask(tasks, 1);
 
     expect(updated).not.toBe(tasks);
-    expect(tasks).toHaveLength(3);
+    expect(tasks).toHaveLength(3); // original inalterado
   });
 
   it('deve retornar a lista completa se o ID não existir', () => {
@@ -221,6 +236,9 @@ describe('removeTask', () => {
   });
 });
 
+// ============================================================
+// 6. filterTasks
+// ============================================================
 describe('filterTasks', () => {
   let tasks;
 
@@ -229,8 +247,7 @@ describe('filterTasks', () => {
     tasks = addTask([], 'Tarefa 1');
     tasks = addTask(tasks, 'Tarefa 2');
     tasks = addTask(tasks, 'Tarefa 3');
-
-    // Marca a tarefa 2 como concluída
+    // Marca a segunda tarefa como concluída
     tasks = tasks.map((t) => (t.id === 2 ? toggleTask(t) : t));
   });
 
@@ -255,14 +272,16 @@ describe('filterTasks', () => {
     expect(result[0].completed).toBe(true);
   });
 
-  it('deve retornar todas as tarefas para filtro desconhecido', () => {
-    const result = filterTasks(tasks, 'qualquer');
+  it('deve retornar todas as tarefas para filtro desconhecido (default)', () => {
+    const result = filterTasks(tasks, 'invalido');
 
     expect(result).toHaveLength(3);
   });
 
   it('deve retornar array vazio para lista vazia', () => {
     expect(filterTasks([], 'all')).toHaveLength(0);
+    expect(filterTasks([], 'pending')).toHaveLength(0);
+    expect(filterTasks([], 'completed')).toHaveLength(0);
   });
 
   it('deve retornar um NOVO array (imutabilidade)', () => {
@@ -272,6 +291,9 @@ describe('filterTasks', () => {
   });
 });
 
+// ============================================================
+// 7. Contagens
+// ============================================================
 describe('countTasks', () => {
   it('deve retornar 0 para lista vazia', () => {
     expect(countTasks([])).toBe(0);
@@ -295,7 +317,6 @@ describe('countCompleted', () => {
     tasks = addTask([], 'Tarefa 1');
     tasks = addTask(tasks, 'Tarefa 2');
     tasks = addTask(tasks, 'Tarefa 3');
-
     tasks = tasks.map((t) => (t.id <= 2 ? toggleTask(t) : t));
   });
 
@@ -309,10 +330,10 @@ describe('countCompleted', () => {
 
   it('deve retornar 0 quando nenhuma tarefa está concluída', () => {
     resetId();
-    let tasks = addTask([], 'A');
-    tasks = addTask(tasks, 'B');
+    let noCompleted = addTask([], 'Tarefa A');
+    noCompleted = addTask(noCompleted, 'Tarefa B');
 
-    expect(countCompleted(tasks)).toBe(0);
+    expect(countCompleted(noCompleted)).toBe(0);
   });
 });
 
@@ -324,7 +345,6 @@ describe('countPending', () => {
     tasks = addTask([], 'Tarefa 1');
     tasks = addTask(tasks, 'Tarefa 2');
     tasks = addTask(tasks, 'Tarefa 3');
-
     tasks = tasks.map((t) => (t.id === 1 ? toggleTask(t) : t));
   });
 
@@ -336,7 +356,7 @@ describe('countPending', () => {
     expect(countPending(tasks)).toBe(2);
   });
 
-  it('deve retornar 0 quando todas estão concluídas', () => {
+  it('deve retornar 0 quando todas as tarefas estão concluídas', () => {
     const allCompleted = tasks.map((t) => ({ ...t, completed: true }));
 
     expect(countPending(allCompleted)).toBe(0);
